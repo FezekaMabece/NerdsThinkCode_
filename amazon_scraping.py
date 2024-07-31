@@ -53,13 +53,13 @@ def scrape_amazon_products(url):
             print("An error occurred:", e)
             return None
         
-def getting_post_request(product_name,product_image,product_url,product_price,scrape_date):
+def getting_post_request(product_name,product_image,product_url,product_price,scrape_date, category):
 
    url = 'https://nerd-biz-bot.vercel.app/products'
    # Data to be sent in the request
    if product_price == 'N/A':
        product_price = 0
-   data = {'product_name': product_name, 'image_url': product_image, 'price': product_price, 'source': product_url, 'date_scraped': scrape_date}
+   data = {'product_name': product_name, 'image_url': product_image, 'price': product_price, 'source': product_url, 'date_scraped': scrape_date, "category": category}
    print(data)
 
    # Send POST request
@@ -95,6 +95,6 @@ if __name__ == "__main__":
         #     print(tabulate(products, headers="keys", tablefmt="grid"))
         
         for product in products:
-            getting_post_request(product["product_name"], product["product_image"], product["product_url"], product["product_price"], product["scrape_date"])
+            getting_post_request(product["product_name"], product["product_image"], product["product_url"], product["product_price"], product["scrape_date"], selected_category)
     else:
         print("Invalid input. Please enter a number between 1 and 6.")
