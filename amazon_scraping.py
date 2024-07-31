@@ -29,13 +29,14 @@ def scrape_amazon_products(url):
                 product_url = item.find("a")['href'] if item.find("a") else "N/A"
                 product_url = "https://www.amazon.com" + product_url if product_url != "N/A" else "N/A"
                 product_price = item.find("span", class_="a-price aok-align-center reinventPricePriceToPayMargin priceToPay").text.strip() if item.find("span", class_="a-price aok-align-center reinventPricePriceToPayMargin priceToPay") else "N/A"
-
+                #The class to find the price!!!
+                # <span aria-hidden="true"><span class="a-price-symbol">$</span><span class="a-price-whole">37<span class="a-price-decimal">.</span></span><span class="a-price-fraction">99</span></span>
                 products.append({
-                    "Name": product_name,
-                    "Image": product_image,
-                    "URL": product_url,
-                    "Price": product_price,
-                    "Scraped Date": scrape_date
+                    "product_name": product_name,
+                    "product_image": product_image,
+                    "product_url": product_url,
+                    "product_price": product_price,
+                    "scrape_date": scrape_date
                 })
 
             return products
@@ -51,6 +52,27 @@ def scrape_amazon_products(url):
         except requests.exceptions.RequestException as e:
             print("An error occurred:", e)
             return None
+        
+def getting_post_request(product_name,product_image,product_url,product_price,scrape_date):
+
+   url = 'https://nerd-biz-bot.vercel.app/products'
+   # Data to be sent in the request
+   if product_price == 'N/A':
+       product_price = 0
+   data = {'product_name': product_name, 'image_url': product_image, 'price': product_price, 'source': product_url, 'date_scraped': scrape_date}
+   print(data)
+
+   # Send POST request
+   response = requests.post(url, json=data)  # Use json= if sending JSON data
+
+   # Check if the request was successful
+   if response.status_code == 200:
+       print('Data submitted successfully!')
+       # Optionally, get the response data
+       response_data = response.json()
+       print(response_data)
+   else:
+       print(f"Request failed with status code {response.status_code}")
 
 if __name__ == "__main__":
     amazon_categories = {
@@ -69,7 +91,10 @@ if __name__ == "__main__":
         selected_category = category_keys[int(user_input) - 1]
         print(f"Scraping products from the {selected_category} category...")
         products = scrape_amazon_products(amazon_categories[selected_category]["url"])
-        if products:
-            print(tabulate(products, headers="keys", tablefmt="grid"))
+        # if products:
+        #     print(tabulate(products, headers="keys", tablefmt="grid"))
+        
+        for product in products:
+            getting_post_request(product["product_name"], product["product_image"], product["product_url"], product["product_price"], product["scrape_date"])
     else:
         print("Invalid input. Please enter a number between 1 and 6.")
